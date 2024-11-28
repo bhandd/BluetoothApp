@@ -13,29 +13,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mobila.bluetoothapp.ui.sceens.HomeScreen
 import com.mobila.bluetoothapp.ui.theme.BluetoothAppTheme
 import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
-
-import com.mobila.bluetoothapp.ui.viewmodels.TrackerVMImpl
+import com.mobila.bluetoothapp.ui.viewmodels.MotionVM
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var motionViewModel: MotionVM
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val factory = MotionVM.MotionVMFactory(application)
+        motionViewModel = ViewModelProvider(this, factory).get(MotionVM::class.java)
+
         enableEdgeToEdge()
         setContent {
             BluetoothAppTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
-//                  val trackerVm: TrackerVMImpl = viewModel(
-//                      factory = TrackerVMImpl.Factory
-//                    )
-                    val fakeVM = FakeVM()
-                    HomeScreen(fakeVM)
-
+                    HomeScreen(motionViewModel)
                 }
             }
         }
