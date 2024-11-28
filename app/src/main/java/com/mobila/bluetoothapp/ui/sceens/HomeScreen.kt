@@ -1,44 +1,32 @@
 package com.mobila.bluetoothapp.ui.sceens
 
-import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mobila.bluetoothapp.R
-import com.mobila.bluetoothapp.model.MotionData
+import com.mobila.bluetoothapp.model.AccelerometerData
+import com.mobila.bluetoothapp.model.GyroscopeData
 import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
 import com.mobila.bluetoothapp.ui.viewmodels.MotionViewModelBase
 
@@ -100,49 +88,108 @@ fun HomeScreen(
 
 @Composable
 fun MiddleElement(vm: MotionViewModelBase) {
-    val motionData = vm.motionData.observeAsState()
+    val motionData = vm.accelerometerData.observeAsState()
+    val gyroscopeData = vm.gyroscopeData.observeAsState()
     Box(
         contentAlignment = Alignment.Center
     ) {
-        if (motionData.value != null) {
-            val data = motionData.value!!
-            MotionDataDisplay(data)
-        } else {
-            Text(text = "Waiting for motion data...", fontSize = 18.sp)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (motionData.value != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    val data = motionData.value!!
+                    AccelerometerDataDisplay(data)
+                }
+            } else {
+                Text(text = "Waiting for motion data...", fontSize = 18.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (gyroscopeData.value != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    val data = gyroscopeData.value!!
+                    GyroscopeDataDisplay(data)
+                }
+            } else {
+                Text(text = "Waiting for gyroscope data...", fontSize = 18.sp)
+            }
         }
     }
 }
 
 @Composable
-fun MotionDataDisplay(motionData: MotionData) {
+fun AccelerometerDataDisplay(accelerometerData: AccelerometerData) {
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Motion Detected: ${motionData.isMotionDetected}",
+            text = "Accelerometer Detected:",
             textAlign = TextAlign.Center,
             fontSize = 20.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "X: ${motionData.x}",
+            text = "X: ${accelerometerData.x}",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Text(
-            text = "Y: ${motionData.y}",
+            text = "Y: ${accelerometerData.y}",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Text(
-            text = "Z: ${motionData.z}",
+            text = "Z: ${accelerometerData.z}",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Timestamp: ${motionData.timestamp}",
+            text = "Timestamp: ${accelerometerData.timestamp}",
+            textAlign = TextAlign.Center,
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun GyroscopeDataDisplay(gyroscopeData: GyroscopeData) {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Gyroscope Data:",
+            textAlign = TextAlign.Center,
+            fontSize = 20.sp)
+        Text(
+            text = "X: ${gyroscopeData.angularX}",
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp)
+        Text(
+            text = "Y: ${gyroscopeData.angularY}",
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp
+        )
+        Text(
+            text = "Z: ${gyroscopeData.angularZ}",
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp
+        )
+        Text(
+            text = "Timestamp: ${gyroscopeData.timestamp}",
             textAlign = TextAlign.Center,
             fontSize = 16.sp
         )
