@@ -1,23 +1,23 @@
 package com.mobila.bluetoothapp
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.mobila.bluetoothapp.model.NavigationController
+import com.mobila.bluetoothapp.ui.sceens.GraphScreen
 import com.mobila.bluetoothapp.ui.sceens.HomeScreen
 import com.mobila.bluetoothapp.ui.theme.BluetoothAppTheme
-import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
 import com.mobila.bluetoothapp.ui.viewmodels.MotionVM
 
 class MainActivity : ComponentActivity() {
@@ -36,25 +36,19 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    HomeScreen(motionViewModel)
+                    val navController = rememberNavController()
+                    NavigationController.setNavController(navController)
+
+                    NavHost(navController = navController, startDestination = "HomeScreen") {
+                        composable("HomeScreen") {
+                            HomeScreen(vm = motionViewModel)
+                        }
+                        composable("GraphScreen") {
+                            GraphScreen(vm = motionViewModel)
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BluetoothAppTheme {
-        Greeting("Android")
     }
 }

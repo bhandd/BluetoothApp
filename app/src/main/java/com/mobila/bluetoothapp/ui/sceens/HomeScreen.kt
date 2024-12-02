@@ -1,6 +1,7 @@
 package com.mobila.bluetoothapp.ui.sceens
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +13,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -25,10 +32,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.mobila.bluetoothapp.model.AccelerometerData
 import com.mobila.bluetoothapp.model.GyroscopeData
 import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
 import com.mobila.bluetoothapp.ui.viewmodels.MotionViewModelBase
+
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.mobila.bluetoothapp.model.NavigationController
+import com.mobila.bluetoothapp.model.SensorData
 
 @Composable
 fun HomeScreen(
@@ -54,8 +69,23 @@ fun HomeScreen(
                     .background(Color.Transparent)
                     .padding(8.dp)
             ) {
+                Button(
+                    onClick = {
+                        NavigationController.navigate("GraphScreen")
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier
+                        .padding(4.dp)
+                ) {
+                    Text(
+                        text = "Graphs",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 Text(
-                    text = "Header",
+                    text = "Measurements",
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.headlineMedium
                 )
@@ -77,7 +107,7 @@ fun HomeScreen(
                     .padding(8.dp)
             ) {
                 Text(
-                    text = "Footer",
+                    text = "Simon, Björn - KTH",
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.headlineMedium
                 )
@@ -129,43 +159,38 @@ fun MiddleElement(vm: MotionViewModelBase) {
 }
 
 @Composable
-fun AccelerometerDataDisplay(accelerometerData: AccelerometerData) {
+fun AccelerometerDataDisplay(accelerometerData: SensorData) {
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Accelerometer Detected:",
+            text = "Accelerometer Data:",
             textAlign = TextAlign.Center,
             fontSize = 20.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "X: ${accelerometerData.x}",
+            text = "X: ${ (Math.round(accelerometerData.x*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Text(
-            text = "Y: ${accelerometerData.y}",
+            text = "Y: ${ (Math.round(accelerometerData.x*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Text(
-            text = "Z: ${accelerometerData.z}",
+            text = "Z: ${ (Math.round(accelerometerData.x*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Timestamp: ${accelerometerData.timestamp}",
-            textAlign = TextAlign.Center,
-            fontSize = 16.sp
-        )
     }
 }
 
 @Composable
-fun GyroscopeDataDisplay(gyroscopeData: GyroscopeData) {
+fun GyroscopeDataDisplay(gyroscopeData: SensorData) {
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -175,23 +200,18 @@ fun GyroscopeDataDisplay(gyroscopeData: GyroscopeData) {
             textAlign = TextAlign.Center,
             fontSize = 20.sp)
         Text(
-            text = "X: ${gyroscopeData.angularX}",
+            text = "X: ${ (Math.round(gyroscopeData.x*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp)
         Text(
-            text = "Y: ${gyroscopeData.angularY}",
+            text = "Y: ${ (Math.round(gyroscopeData.y*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Text(
-            text = "Z: ${gyroscopeData.angularZ}",
+            text = "Z: ${ (Math.round(gyroscopeData.z*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
-        )
-        Text(
-            text = "Timestamp: ${gyroscopeData.timestamp}",
-            textAlign = TextAlign.Center,
-            fontSize = 16.sp
         )
     }
 }

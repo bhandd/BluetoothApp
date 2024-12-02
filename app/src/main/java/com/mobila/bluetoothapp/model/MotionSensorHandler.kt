@@ -15,12 +15,12 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
         application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
     private val accelerometerSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-    private val _accelerometerData = MutableLiveData<AccelerometerData>()
-    val accelerometerData: LiveData<AccelerometerData> get() = _accelerometerData
+    private val _accelerometerData = MutableLiveData<SensorData>()
+    val accelerometerData: LiveData<SensorData> get() = _accelerometerData
 
     private val gyroscope: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-    private val _gyroscopeData = MutableLiveData<GyroscopeData>()
-    val gyroscopeData: LiveData<GyroscopeData> get() = _gyroscopeData
+    private val _gyroscopeData = MutableLiveData<SensorData>()
+    val gyroscopeData: LiveData<SensorData> get() = _gyroscopeData
 
     init {
         startListening()
@@ -46,19 +46,18 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     val x = event.values[0]
                     val y = event.values[1]
                     val z = event.values[2]
-                    val timestamp = System.currentTimeMillis()
+                    //val timestamp = System.currentTimeMillis()
 
                     // Simple motion detection logic
-                    val isMotionDetected = (x > 1 || y > 1 || z > 1)
+                    //val isMotionDetected = (x > 1 || y > 1 || z > 1)
 
                     // Create and post a MotionData object
                     _accelerometerData.postValue(
-                        AccelerometerData(
+                        SensorData(
                             //isMotionDetected = isMotionDetected,
                             x = x,
                             y = y,
-                            z = z,
-                            timestamp = timestamp
+                            z = z
                         )
                     )
                 }
@@ -67,11 +66,10 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     val y = event.values[1]
                     val z = event.values[2]
                     _gyroscopeData.postValue(
-                        GyroscopeData(
-                            angularX = x,
-                            angularY = y,
-                            angularZ = z,
-                            timestamp = System.currentTimeMillis()
+                        SensorData(
+                            x = x,
+                            y = y,
+                            z = z
                         )
                     )
                 }
@@ -84,11 +82,16 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     }
 }
 
-data class AccelerometerData(
-    //val isMotionDetected: Boolean,
+data class SensorData(
     val x: Float,
     val y: Float,
     val z: Float,
+)
+
+data class AccelerometerData (
+    val velX: Float,
+    val velY: Float,
+    val velZ: Float,
     val timestamp: Long
 )
 

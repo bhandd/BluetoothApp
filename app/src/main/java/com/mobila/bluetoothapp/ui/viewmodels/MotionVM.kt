@@ -7,10 +7,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.mobila.bluetoothapp.model.AccelerometerData
 import com.mobila.bluetoothapp.model.GyroscopeData
 import com.mobila.bluetoothapp.model.MotionSensorHandler
+import com.mobila.bluetoothapp.model.SensorData
 
 interface MotionViewModelBase{
-    val accelerometerData: LiveData<AccelerometerData>
-    val gyroscopeData: LiveData<GyroscopeData>
+    val accelerometerData: LiveData<SensorData>
+    val gyroscopeData: LiveData<SensorData>
 }
 
 class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
