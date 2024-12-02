@@ -22,13 +22,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import com.mobila.bluetoothapp.model.AccelerometerData
 import com.mobila.bluetoothapp.model.GyroscopeData
 import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
 import com.mobila.bluetoothapp.ui.viewmodels.MotionViewModelBase
+
+import androidx.compose.foundation.Canvas
+
+import androidx.compose.runtime.*
+
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlinx.coroutines.delay
+
 
 @Composable
 fun HomeScreen(
@@ -120,6 +132,8 @@ fun MiddleElement(vm: MotionViewModelBase) {
                 ) {
                     val data = gyroscopeData.value!!
                     GyroscopeDataDisplay(data)
+
+
                 }
             } else {
                 Text(text = "Waiting for gyroscope data...", fontSize = 18.sp)
@@ -203,3 +217,4 @@ fun HomeScreenPreview() {
         HomeScreen(FakeVM(application = Application()))
     }
 }
+
