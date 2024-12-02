@@ -22,6 +22,9 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     private val _gyroscopeData = MutableLiveData<GyroscopeData>()
     val gyroscopeData: LiveData<GyroscopeData> get() = _gyroscopeData
 
+    //Filtering gravity
+    val linear_acceleration = FloatArray(3)
+    val gravity = floatArrayOf(0f, 0f, 0f) //Todo: Move this to a class field
     init {
         startListening()
     }
@@ -43,21 +46,38 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
         event?.let {
             when (event.sensor.type) {
                 Sensor.TYPE_ACCELEROMETER -> {
-                    val x = event.values[0]
-                    val y = event.values[1]
-                    val z = event.values[2]
+//                    var x = event.values[0]
+//                    var y = event.values[1]
+//                    var z = event.values[2]
                     val timestamp = System.currentTimeMillis()
 
                     // Simple motion detection logic
-                    val isMotionDetected = (x > 1 || y > 1 || z > 1)
+                   // val isMotionDetected = (x > 1 || y > 1 || z > 1)
+
+                    // Isolate the force of gravity with the low-pass filter.
+
+
+                    val alpha = 0.8f
+
+                    gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
+                    gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
+                    gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
+
+                    // Remove the gravity contribution with the high-pass filter.
+                    linear_acceleration[0]= event.values[0] - gravity.get(0)
+                    linear_acceleration[1] = event.values[1] - gravity.get(1)
+                    linear_acceleration[2] = event.values[2] - gravity.get(2)
 
                     // Create and post a MotionData object
                     _accelerometerData.postValue(
                         AccelerometerData(
-                            //isMotionDetected = isMotionDetected,
-                            x = x,
-                            y = y,
-                            z = z,
+//                            //isMotionDetected = isMotionDetected,
+//                            x = x,
+//                            y = y,
+//                            z = z,
+                            x = linear_acceleration[0],
+                            y =  linear_acceleration[1],
+                            z = linear_acceleration[2],
                             timestamp = timestamp
                         )
                     )
