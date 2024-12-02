@@ -1,6 +1,5 @@
 package com.mobila.bluetoothapp.model
 
-
 import android.app.Application
 import android.content.Context
 import android.hardware.Sensor
@@ -9,7 +8,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-
 
 class MotionSensorHandler(application: Application) : SensorEventListener {
 
@@ -24,8 +22,6 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     private val _gyroscopeData = MutableLiveData<GyroscopeData>()
     val gyroscopeData: LiveData<GyroscopeData> get() = _gyroscopeData
 
-
-    val linear_acceleration = FloatArray(3)
     init {
         startListening()
     }
@@ -51,22 +47,9 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     val y = event.values[1]
                     val z = event.values[2]
                     val timestamp = System.currentTimeMillis()
-                    val alpha = 0.8.toFloat()
-                    val gravity = FloatArray(3)
-//                    // Simple motion detection logic
-//                    val isMotionDetected = (x > 1 || y > 1 || z > 1)
 
-
-
-//                    // Isolate the force of gravity with the low-pass filter.
-//                    gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
-//                    gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
-//                    gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
-//
-//                    // Remove the gravity contribution with the high-pass filter.
-//                    linear_acceleration[0] = event.values[0] - gravity.get(0)
-//                    linear_acceleration[1] = event.values[1] - gravity.get(1)
-//                    linear_acceleration[2] = event.values[2] - gravity.get(2)
+                    // Simple motion detection logic
+                    val isMotionDetected = (x > 1 || y > 1 || z > 1)
 
                     // Create and post a MotionData object
                     _accelerometerData.postValue(
@@ -78,7 +61,6 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                             timestamp = timestamp
                         )
                     )
-
                 }
                 Sensor.TYPE_GYROSCOPE -> {
                     val x = event.values[0]
@@ -96,28 +78,6 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
             }
         }
     }
-
-    /**Filtering the sensor data
-     *
-     * */
-    override fun onSensorChanged(event: SensorEvent) {
-        // alpha is calculated as t / (t + dT)
-        // with t, the low-pass filter's time-constant
-        // and dT, the event delivery rate
-
-        val alpha = 0.8.toFloat()
-        val gravity = FloatArray(3)
-        // Isolate the force of gravity with the low-pass filter.
-        gravity[0] = alpha * gravity.get(0) + (1 - alpha) * event.values[0]
-        gravity[1] = alpha * gravity.get(1) + (1 - alpha) * event.values[1]
-        gravity[2] = alpha * gravity.get(2) + (1 - alpha) * event.values[2]
-
-        // Remove the gravity contribution with the high-pass filter.
-        linear_acceleration[0] = event.values[0] - gravity.get(0)
-        linear_acceleration[1] = event.values[1] - gravity.get(1)
-        linear_acceleration[2] = event.values[2] - gravity.get(2)
-    }
-
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Not used for now
