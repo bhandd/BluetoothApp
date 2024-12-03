@@ -176,12 +176,12 @@ fun AccelerometerDataDisplay(accelerometerData: SensorData) {
             fontSize = 18.sp
         )
         Text(
-            text = "Y: ${ (Math.round(accelerometerData.x*100))/100f }",
+            text = "Y: ${ (Math.round(accelerometerData.y*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
         Text(
-            text = "Z: ${ (Math.round(accelerometerData.x*100))/100f }",
+            text = "Z: ${ (Math.round(accelerometerData.z*100))/100f }",
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )

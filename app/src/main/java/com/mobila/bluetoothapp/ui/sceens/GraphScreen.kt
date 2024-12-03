@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -61,16 +62,22 @@ fun GraphScreen (
                 )
             )
     ) {
-        Column() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Transparent)
                     .padding(8.dp)
+
             ) {
                 Button(
                     onClick = {
-                        vm.stopListening()
+
                         NavigationController.navigate("HomeScreen")
 
                     },
@@ -90,7 +97,27 @@ fun GraphScreen (
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.headlineMedium
                 )
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = {
+                        vm.toggleRecording()
+
+
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                ) {
+                    Text(
+                        text = "Start/stop",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
+
 
             Column(
                 modifier = Modifier

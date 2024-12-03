@@ -13,6 +13,7 @@ interface MotionViewModelBase{
     val accelerometerData: LiveData<SensorData>
     val gyroscopeData: LiveData<SensorData>
     fun stopListening()
+    fun toggleRecording()
 }
 
 class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
@@ -23,6 +24,10 @@ class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
 
     override fun stopListening() {
         motionSensorModel.stopListening()
+    }
+
+    override fun toggleRecording() {
+        motionSensorModel.toggleRecording()
     }
 
     class MotionVMFactory(private val application: Application) : ViewModelProvider.Factory {
@@ -44,5 +49,9 @@ class FakeVM(application: Application) : MotionViewModelBase {
 
     override fun stopListening() {
         fakeMotionSensorModel.stopListening()
+    }
+
+    override fun toggleRecording() {
+        TODO("Not yet implemented")
     }
 }
