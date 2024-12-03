@@ -67,7 +67,8 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .background(Color.Transparent)
             ) {
-                MiddleElement(vm)
+               // MiddleElement(vm)
+                GraphScreen(vm)
             }
 
             Box(
