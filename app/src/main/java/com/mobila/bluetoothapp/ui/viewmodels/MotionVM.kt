@@ -4,14 +4,12 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.mobila.bluetoothapp.model.AccelerometerData
-import com.mobila.bluetoothapp.model.GyroscopeData
 import com.mobila.bluetoothapp.model.MotionSensorHandler
 import com.mobila.bluetoothapp.model.SensorData
 
 interface MotionViewModelBase{
-    val accelerometerData: LiveData<SensorData>
-    val gyroscopeData: LiveData<SensorData>
+    val linearAcceleration: LiveData<SensorData>
+    val sensorFusion: LiveData<SensorData>
     fun stopListening()
     fun toggleRecording()
 }
@@ -19,8 +17,8 @@ interface MotionViewModelBase{
 class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
     private val motionSensorModel = MotionSensorHandler(application)
 
-    override val accelerometerData = motionSensorModel.accelerometerData
-    override val gyroscopeData = motionSensorModel.gyroscopeData
+    override val linearAcceleration = motionSensorModel.linearAcceleration
+    override val sensorFusion = motionSensorModel.sensorFusion
 
     override fun stopListening() {
         motionSensorModel.stopListening()
@@ -44,8 +42,8 @@ class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
 class FakeVM(application: Application) : MotionViewModelBase {
     private val fakeMotionSensorModel = MotionSensorHandler(application)
 
-    override val accelerometerData = fakeMotionSensorModel.accelerometerData
-    override val gyroscopeData = fakeMotionSensorModel.gyroscopeData
+    override val linearAcceleration = fakeMotionSensorModel.linearAcceleration
+    override val sensorFusion = fakeMotionSensorModel.sensorFusion
 
     override fun stopListening() {
         fakeMotionSensorModel.stopListening()

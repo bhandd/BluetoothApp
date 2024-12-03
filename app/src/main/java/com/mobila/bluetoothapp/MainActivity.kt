@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavigationController.setNavController(navController)
 
-                    NavHost(navController = navController, startDestination = "GraphScreen") {
+                    NavHost(navController = navController, startDestination = "HomeScreen") {
                         composable("HomeScreen") {
                             HomeScreen(vm = motionViewModel)
                         }

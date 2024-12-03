@@ -1,7 +1,6 @@
 package com.mobila.bluetoothapp.ui.sceens
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,15 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -32,16 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.mobila.bluetoothapp.model.AccelerometerData
-import com.mobila.bluetoothapp.model.GyroscopeData
 import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
 import com.mobila.bluetoothapp.ui.viewmodels.MotionViewModelBase
 
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import com.mobila.bluetoothapp.model.NavigationController
 import com.mobila.bluetoothapp.model.SensorData
 
@@ -89,6 +77,22 @@ fun HomeScreen(
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.headlineMedium
                 )
+                Button(
+                    onClick = {
+                        vm.toggleRecording()
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                ) {
+                    Text(
+                        text = "Start/stop",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
 
             Box(
@@ -118,8 +122,8 @@ fun HomeScreen(
 
 @Composable
 fun MiddleElement(vm: MotionViewModelBase) {
-    val motionData = vm.accelerometerData.observeAsState()
-    val gyroscopeData = vm.gyroscopeData.observeAsState()
+    val linearData = vm.linearAcceleration.observeAsState()
+    val sensorFusion = vm.sensorFusion.observeAsState()
     Box(
         contentAlignment = Alignment.Center
     ) {
@@ -127,13 +131,13 @@ fun MiddleElement(vm: MotionViewModelBase) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (motionData.value != null) {
+            if (linearData.value != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 ) {
-                    val data = motionData.value!!
+                    val data = linearData.value!!
                     AccelerometerDataDisplay(data)
                 }
             } else {
@@ -142,13 +146,13 @@ fun MiddleElement(vm: MotionViewModelBase) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (gyroscopeData.value != null) {
+            if (sensorFusion.value != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 ) {
-                    val data = gyroscopeData.value!!
+                    val data = sensorFusion.value!!
                     GyroscopeDataDisplay(data)
                 }
             } else {
@@ -165,7 +169,7 @@ fun AccelerometerDataDisplay(accelerometerData: SensorData) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Accelerometer Data:",
+            text = "Linear acceleration data:",
             textAlign = TextAlign.Center,
             fontSize = 20.sp
         )
@@ -196,7 +200,7 @@ fun GyroscopeDataDisplay(gyroscopeData: SensorData) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Gyroscope Data:",
+            text = "Sensor fusion data:",
             textAlign = TextAlign.Center,
             fontSize = 20.sp)
         Text(

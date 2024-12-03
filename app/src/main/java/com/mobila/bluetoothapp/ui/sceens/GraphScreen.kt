@@ -45,8 +45,8 @@ import com.mobila.bluetoothapp.ui.viewmodels.MotionViewModelBase
 fun GraphScreen (
     vm: MotionViewModelBase
 ) {
-    val accelerometerLiveData: LiveData<SensorData> = vm.accelerometerData
-    val gyroscopeLiveData: LiveData<SensorData> = vm.gyroscopeData
+    val linear_acceleration: LiveData<SensorData> = vm.linearAcceleration
+    val sensor_fusion: LiveData<SensorData> = vm.sensorFusion
 
 
     Box(
@@ -77,9 +77,7 @@ fun GraphScreen (
             ) {
                 Button(
                     onClick = {
-
                         NavigationController.navigate("HomeScreen")
-
                     },
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier
@@ -101,8 +99,6 @@ fun GraphScreen (
                 Button(
                     onClick = {
                         vm.toggleRecording()
-
-
                     },
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier
@@ -131,7 +127,7 @@ fun GraphScreen (
                         .background(Color.Transparent)
                 ) {
                     Text(
-                        text = "Accelerometer Data",
+                        text = "Linear acceleration data",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -143,7 +139,7 @@ fun GraphScreen (
                         .background(Color.Transparent)
                 ) {
                     DataGraph(
-                        liveData = accelerometerLiveData,
+                        liveData = linear_acceleration,
                         yRange = 40f
                     )
                 }
@@ -154,7 +150,7 @@ fun GraphScreen (
                         .background(Color.Transparent)
                 ) {
                     Text(
-                        text = "Gyroscope Data",
+                        text = "Sensor fusion data",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -166,8 +162,8 @@ fun GraphScreen (
                         .background(Color.Transparent)
                 ) {
                     DataGraph(
-                        liveData = gyroscopeLiveData,
-                        yRange = 20f
+                        liveData = sensor_fusion,
+                        yRange = 40f
                     )
                 }
             }
@@ -189,103 +185,6 @@ fun GraphScreen (
 }
 
 @Composable
-fun AccelerometerGraph (
-    vm: MotionViewModelBase
-) {
-    val sensorData = vm.accelerometerData.observeAsState()
-    val dataPoints = remember { mutableStateListOf<SensorData>() }
-
-    sensorData.value?.let {
-        if (dataPoints.size > 200) {
-            dataPoints.removeAt(0)
-        }
-        dataPoints.add(it)
-    }
-    AndroidView(
-        factory = { context ->
-            LineChart(context).apply {
-                description.isEnabled = false
-                //setDrawGridBackground(true)
-                setTouchEnabled(true)
-                isDragEnabled = true
-                setScaleEnabled(true)
-                setPinchZoom(true)
-                legend.isEnabled = true
-                xAxis.apply {
-                    position = XAxis.XAxisPosition.BOTTOM
-                    setDrawGridLines(true)
-                }
-                axisLeft.apply {
-                    axisMaximum = 15f // Set max value for Y-axis
-                    axisMinimum = -15f // Set min value for Y-axis
-                    setDrawGridLines(true) // Draw grid lines
-                }
-                axisRight.isEnabled = false
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .padding(16.dp),
-        update = { chart ->
-            val lineData = createLineData(dataPoints)
-            chart.data = lineData
-            chart.invalidate()
-        }
-    )
-}
-
-
-
-@Composable
-fun GyroscopeGraph (
-    vm: MotionViewModelBase
-) {
-    val gyroscopeData = vm.gyroscopeData.observeAsState()
-    val dataPoints = remember { mutableStateListOf<SensorData>() }
-
-    gyroscopeData.value?.let {
-        if (dataPoints.size > 200) {
-            dataPoints.removeAt(0)
-        }
-        dataPoints.add(it)
-    }
-
-    AndroidView(
-        factory = { context ->
-            LineChart(context).apply {
-                description.isEnabled = false
-                //setDrawGridBackground(true)
-                setTouchEnabled(true)
-                isDragEnabled = true
-                setScaleEnabled(true)
-                setPinchZoom(true)
-                legend.isEnabled = true
-                xAxis.apply {
-                    position = XAxis.XAxisPosition.BOTTOM
-                    setDrawGridLines(true)
-                }
-                axisLeft.apply {
-                    axisMaximum = 15f // Set max value for Y-axis
-                    axisMinimum = -15f // Set min value for Y-axis
-                    setDrawGridLines(true) // Draw grid lines
-                }
-                axisRight.isEnabled = false
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .padding(16.dp),
-        update = { chart ->
-            val lineData = createLineData(dataPoints)
-            chart.data = lineData
-            chart.invalidate()
-        }
-    )
-}
-
-@Composable
 fun DataGraph(
     liveData: LiveData<SensorData>, yRange: Float
 ) {
@@ -293,7 +192,7 @@ fun DataGraph(
     val dataPoints = remember { mutableStateListOf<SensorData>() }
 
     data.value?.let {
-        if (dataPoints.size > 200) {
+        if (dataPoints.size > 250) {
             dataPoints.removeAt(0)
         }
         dataPoints.add(it)
@@ -303,7 +202,6 @@ fun DataGraph(
         factory = { context ->
             LineChart(context).apply {
                 description.isEnabled = false
-                //setDrawGridBackground(true)
                 setTouchEnabled(false)
                 isDragEnabled = false
                 setScaleEnabled(true)
@@ -314,9 +212,9 @@ fun DataGraph(
                     setDrawGridLines(true)
                 }
                 axisLeft.apply {
-                    axisMaximum = yRange // Set max value for Y-axis
-                    axisMinimum = -yRange // Set min value for Y-axis
-                    setDrawGridLines(true) // Draw grid lines
+                    axisMaximum = yRange
+                    axisMinimum = -yRange
+                    setDrawGridLines(true)
                 }
                 axisRight.isEnabled = false
             }
@@ -341,7 +239,6 @@ fun createLineData(data: List<SensorData>): LineData {
         color = android.graphics.Color.RED
         valueTextColor = android.graphics.Color.RED
         lineWidth = 2f
-        mode = LineDataSet.Mode.CUBIC_BEZIER
         setDrawCircles(false)
         setDrawValues(false)
     }
@@ -349,7 +246,6 @@ fun createLineData(data: List<SensorData>): LineData {
         color = android.graphics.Color.BLUE
         valueTextColor = android.graphics.Color.BLUE
         lineWidth = 2f
-        mode = LineDataSet.Mode.CUBIC_BEZIER
         setDrawCircles(false)
         setDrawValues(false)
     }
@@ -357,7 +253,6 @@ fun createLineData(data: List<SensorData>): LineData {
         color = android.graphics.Color.GREEN
         valueTextColor = android.graphics.Color.GREEN
         lineWidth = 2f
-        mode = LineDataSet.Mode.CUBIC_BEZIER
         setDrawCircles(false)
         setDrawValues(false)
     }
