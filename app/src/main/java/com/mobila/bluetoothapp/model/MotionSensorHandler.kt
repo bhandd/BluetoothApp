@@ -22,6 +22,9 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     private val _gyroscopeData = MutableLiveData<SensorData>()
     val gyroscopeData: LiveData<SensorData> get() = _gyroscopeData
 
+    var gravity = floatArrayOf(0f, 0f, 0f)
+
+
     init {
         startListening()
     }
@@ -47,17 +50,33 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     val y = event.values[1]
                     val z = event.values[2]
                     //val timestamp = System.currentTimeMillis()
-
+                    val linear_acceleration = floatArrayOf(0f, 0f, 0f)
                     // Simple motion detection logic
                     //val isMotionDetected = (x > 1 || y > 1 || z > 1)
 
+                    // Isolate the force of gravity with the low-pass filter.
+
+
+                    val alpha = 0.8f
+
+                    gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
+                    gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
+                    gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
+
+                    // Remove the gravity contribution with the high-pass filter.
+                    linear_acceleration[0]= event.values[0] - gravity.get(0)
+                    linear_acceleration[1] = event.values[1] - gravity.get(1)
+                    linear_acceleration[2] = event.values[2] - gravity.get(2)
                     // Create and post a MotionData object
                     _accelerometerData.postValue(
                         SensorData(
                             //isMotionDetected = isMotionDetected,
-                            x = x,
-                            y = y,
-                            z = z
+//                            x = x,
+//                            y = y,
+//                            z = z
+                            x = linear_acceleration[0],
+                            y = linear_acceleration[1],
+                            z = linear_acceleration[2]
                         )
                     )
                 }
