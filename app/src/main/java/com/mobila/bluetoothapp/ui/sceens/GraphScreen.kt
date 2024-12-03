@@ -47,6 +47,7 @@ fun GraphScreen (
     val accelerometerLiveData: LiveData<SensorData> = vm.accelerometerData
     val gyroscopeLiveData: LiveData<SensorData> = vm.gyroscopeData
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -69,7 +70,9 @@ fun GraphScreen (
             ) {
                 Button(
                     onClick = {
+                        vm.stopListening()
                         NavigationController.navigate("HomeScreen")
+
                     },
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier

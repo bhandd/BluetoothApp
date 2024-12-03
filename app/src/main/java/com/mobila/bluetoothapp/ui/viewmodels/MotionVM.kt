@@ -12,6 +12,7 @@ import com.mobila.bluetoothapp.model.SensorData
 interface MotionViewModelBase{
     val accelerometerData: LiveData<SensorData>
     val gyroscopeData: LiveData<SensorData>
+    fun stopListening()
 }
 
 class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
@@ -20,7 +21,7 @@ class MotionVM(application: Application) : MotionViewModelBase, ViewModel() {
     override val accelerometerData = motionSensorModel.accelerometerData
     override val gyroscopeData = motionSensorModel.gyroscopeData
 
-    fun stopListening() {
+    override fun stopListening() {
         motionSensorModel.stopListening()
     }
 
@@ -41,7 +42,7 @@ class FakeVM(application: Application) : MotionViewModelBase {
     override val accelerometerData = fakeMotionSensorModel.accelerometerData
     override val gyroscopeData = fakeMotionSensorModel.gyroscopeData
 
-    fun stopListening() {
+    override fun stopListening() {
         fakeMotionSensorModel.stopListening()
     }
 }

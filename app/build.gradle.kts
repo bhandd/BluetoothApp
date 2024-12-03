@@ -16,6 +16,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        packaging {
+            resources {
+                excludes += mutableSetOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md", "META-INF/NOTICE", "META-INF/LICENSE")
+            }
+        }
     }
 
     buildTypes {
