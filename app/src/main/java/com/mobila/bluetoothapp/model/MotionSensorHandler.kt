@@ -6,10 +6,13 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.icu.text.SimpleDateFormat
 import android.os.Environment
 import android.util.Log
+import java.util.Locale
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import java.util.Date
 
 class MotionSensorHandler(application: Application) : SensorEventListener {
 
@@ -68,11 +71,11 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     val x = event.values[0]
                     val y = event.values[1]
                     val z = event.values[2]
-                    val timestamp = System.currentTimeMillis()
+                    val timestamp = formatTimestamp(System.currentTimeMillis())
                     val linear_acceleration = floatArrayOf(0f, 0f, 0f)
 
                     //list to save data
-                    val sensorData = SensorData(x = gravity[0], y = gravity[1], z = gravity[2])
+                    val sensorData = SensorData(x = gravity[0], y = gravity[1], z = gravity[2], timeStamp = timestamp)
 
                     // Simple motion detection logic
                     //val isMotionDetected = (x > 1 || y > 1 || z > 1)
@@ -93,9 +96,12 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     _accelerometerData.postValue(
                         SensorData(
                             //isMotionDetected = isMotionDetected,
+
                             x = gravity[0],
                             y = gravity[1],
-                            z = gravity[2]
+                            z = gravity[2],
+                            timeStamp = formatTimestamp(System.currentTimeMillis())
+
 //                            x = linear_acceleration[0],
 //                            y = linear_acceleration[1],
 //                            z = linear_acceleration[2]
@@ -111,7 +117,8 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                         SensorData(
                             x = x,
                             y = y,
-                            z = z
+                            z = z,
+                            timeStamp = formatTimestamp(System.currentTimeMillis())
                         )
                     )
                 }
@@ -163,6 +170,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
  * **/
 private fun saveToCsv(dataList: List<SensorData>, fileName: String) {
     Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
+
     val file = fileDir?.resolve("$fileName.csv")
     file?.bufferedWriter().use { writer ->
         // Skriv rubriker till CSV-filen
@@ -170,10 +178,15 @@ private fun saveToCsv(dataList: List<SensorData>, fileName: String) {
 
         // Skriv sensor data från listan
         dataList.forEach { data ->
-            writer?.write("${System.currentTimeMillis()},${data.x},${data.y},${data.z}\n")
+            writer?.write("${data.x},${data.y},${data.z}, ${data.timeStamp}\n")
         }
     }
 }
+
+    fun formatTimestamp(timestamp: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return sdf.format(Date(timestamp))
+    }
 
 
     fun exportAccelerometerData() {
@@ -189,6 +202,7 @@ data class SensorData(
     val x: Float,
     val y: Float,
     val z: Float,
+    val timeStamp: String
 )
 
 data class AccelerometerData (
