@@ -15,7 +15,6 @@ import androidx.lifecycle.MutableLiveData
 import java.util.Date
 
 import android.graphics.Bitmap
-import android.widget.Toast
 import com.github.mikephil.charting.charts.LineChart
 import java.io.File
 import java.io.FileOutputStream
@@ -263,6 +262,22 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
         isRecording = !isRecording
     }
 
+    fun readCsvWithBufferedReader(file: File): List<String> {
+        val lines = mutableListOf<String>()
+        file.bufferedReader().use { reader -> // Skapar en BufferedReader
+            var line: String? = reader.readLine()
+            while (line != null) {
+                lines.add(line)
+                line = reader.readLine()
+            }
+        }
+        return lines
+    }
+
+
+
+
+    //TODO: delete
     fun saveChartToFile(lineChart: LineChart, fileName: String): Boolean {
         try {
             // Skapa en bitmap från grafen

@@ -230,6 +230,7 @@ fun DataGraph(
     )
 }
 
+
 fun createLineData(data: List<SensorData>): LineData {
     val xEntries = data.mapIndexed { index, point -> Entry(index.toFloat(), point.x) }
     val yEntries = data.mapIndexed { index, point -> Entry(index.toFloat(), point.y) }
@@ -257,4 +258,5 @@ fun createLineData(data: List<SensorData>): LineData {
         setDrawValues(false)
     }
     return LineData(xDataSet, yDataSet, zDataSet)
+
 }
