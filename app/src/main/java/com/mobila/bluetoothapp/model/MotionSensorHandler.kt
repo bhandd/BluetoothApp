@@ -213,7 +213,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
 
             // Skriv sensor data från listan
             dataList.forEach { data ->
-                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp}\n")
+                writer?.write("${data.elevationAngle};${data.y};${data.z}; ${data.timeStamp}\n")
             }
         }
     }
@@ -222,32 +222,86 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
         saveToCsv(_linearAccelerationDataList, _sensorFusionDataList, "Data")
     }
 
-    private fun saveToCsv(
-        dataList1: List<SensorData>,
-        dataList2: List<SensorData>,
-        fileName: String
-    ) {
-        Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
-        val file = fileDir?.resolve("$fileName.csv")
-        file?.bufferedWriter().use { writer ->
-            // Skriv rubriker till CSV-filen
-            writer?.write("aX;aY;aZ;Time\n")
-            // Skriv sensor data från listan
-            dataList1.forEach { data ->
-                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp};\n")
-                // Lägg till en tom rad som separator
-            }
-            writer?.write("\n")
-            // Skriv rubriker för andra datauppsättningen
-            writer?.write("fX;fY;fZ;Time\n")
-            // Skriv data från dataList2
-            dataList2.forEach { data ->
-                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp}\n")
-            }
 
+
+//    private fun saveToCsv(
+//        dataList1: List<SensorData>,
+//        dataList2: List<SensorData>,
+//        fileName: String
+//    ) {
+//        Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
+//        val file = fileDir?.resolve("$fileName.csv")
+//        file?.bufferedWriter().use { writer ->
+//            // Skriv rubriker till CSV-filen
+//            writer?.write("Linear Angle\n")
+//            // Skriv sensor data från listan
+//            dataList1.forEach { data ->
+//                writer?.write("${data.elevationAngle}; ${data.timeStamp};\n")
+//                // Lägg till en tom rad som separator
+//            }
+//            writer?.write("\n")
+//            // Skriv rubriker för andra datauppsättningen
+//            writer?.write("Fused Angle\n")
+//            // Skriv data från dataList2
+//            dataList2.forEach { data ->
+//                writer?.write("${data.elevationAngle}; ${data.timeStamp}\n")
+//            }
+//
+//        }
+//
+//    }
+//    private fun saveToCsv(
+//        dataList1: List<SensorData>,
+//        dataList2: List<SensorData>,
+//        fileName: String
+//    ) {
+//        Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
+//        val file = fileDir?.resolve("$fileName.csv")
+//        file?.bufferedWriter().use { writer ->
+//            // Skriv rubriker till CSV-filen
+//            writer?.write("aX;aY;aZ;Time\n")
+//            // Skriv sensor data från listan
+//            dataList1.forEach { data ->
+//                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp};\n")
+//                // Lägg till en tom rad som separator
+//            }
+//            writer?.write("\n")
+//            // Skriv rubriker för andra datauppsättningen
+//            writer?.write("fX;fY;fZ;Time\n")
+//            // Skriv data från dataList2
+//            dataList2.forEach { data ->
+//                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp}\n")
+//            }
+//
+//        }
+//
+//    }
+
+
+
+
+private fun saveToCsv(
+    dataList1: List<SensorData>,
+    dataList2: List<SensorData>,
+    fileName: String
+) {
+    Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
+    val file = fileDir?.resolve("$fileName.csv")
+    file?.bufferedWriter().use { writer ->
+        // Skriv rubriker till CSV-filen
+        writer?.write("Linear Angle;Fused Angle;Time\n")
+        // Skriv sensor data från listan
+        val maxSize = maxOf(dataList1.size, dataList2.size)
+        for (i in 0 until maxSize) {
+            val linearAngle = dataList1.getOrNull(i)?.elevationAngle ?: ""
+            val fusedAngle = dataList2.getOrNull(i)?.elevationAngle ?: ""
+            val timeStamp = dataList1.getOrNull(i)?.timeStamp ?: dataList2.getOrNull(i)?.timeStamp ?: ""
+            writer?.write("$linearAngle;$fusedAngle; $timeStamp\n")
         }
-
     }
+}
+
+
     fun toggleRecording() {
         if (isRecording) {
             stopListening()
