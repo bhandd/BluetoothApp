@@ -19,6 +19,8 @@ import android.widget.Toast
 import com.github.mikephil.charting.charts.LineChart
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 class MotionSensorHandler(application: Application) : SensorEventListener {
 
@@ -38,7 +40,9 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     //Save data
     private val _linearAccelerationDataList = mutableListOf<SensorData>()
     private val _linearAccelerationLiveData = MutableLiveData<SensorData>()
+    private var _elevationAngle = MutableLiveData<Float>()
     val linearAcceleration: LiveData<SensorData> get() = _linearAccelerationLiveData
+   // val elevationAngle: LiveData<SensorData> get() = _elevationAngle
 
     private val _sensorFusionDataList = mutableListOf<SensorData>()
     private val _sensorFusionLiveData = MutableLiveData<SensorData>()
@@ -48,8 +52,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
 
     // Variabler för komplementärt filter
     var alpha = 0.8f // Filterfaktor, justera beroende på behov
-    var fusedAngle = 0f // Resultatet av komplementärt filter
-    var deltaT = 0.01f // Tidsintervall mellan mätningar (i sekunder)
+
 
     // Håll reda på vinkeln från gyroskop och accelerometer
     var gyroAngle = 0f
@@ -66,10 +69,12 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
             accelerometerData?.let {
                 // Skapa en modifierad version av accelerometer-data
                 val modifiedData = modifyAccelerometerData(it)
+                //val elevationAngle = calculateElevationAngle(modifiedData.x, modifiedData.y, modifiedData.z)
 
                 // Lägg till den modifierade datan i linearAccelerationDataList
                 _linearAccelerationLiveData.postValue(modifiedData)
                 _linearAccelerationDataList.add(modifiedData)
+               // _elevationAngle.postValue(elevationAngle)
             }
         }
         _accelerometerData.observeForever { accelerometerData ->
@@ -111,25 +116,37 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                     val y = event.values[1]
                     val z = event.values[2]
                     val timestamp = formatTimestamp(System.currentTimeMillis())
+
+
                     _accelerometerData.postValue(
                         SensorData(
                             x = x,
                             y = y,
                             z = z,
+                            elevationAngle = calculateElevationAngle(x, y, z), //todo: move this
                             timeStamp = timestamp
+
                         )
                     )
                 }
+
                 Sensor.TYPE_GYROSCOPE -> {
                     val x = event.values[0]
                     val y = event.values[1]
                     val z = event.values[2]
+
+                    val timestamp = formatTimestamp(System.currentTimeMillis())
+
+
+
+
                     _gyroscopeData.postValue(
                         SensorData(
                             x = x,
                             y = y,
                             z = z,
-                            timeStamp = formatTimestamp(System.currentTimeMillis())
+                            elevationAngle = calculateElevationAngle(x, y, z), //todo: move this
+                            timeStamp = timestamp
                         )
                     )
                 }
@@ -150,6 +167,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
             x = modifiedX,
             y = modifiedY,
             z = modifiedZ,
+            elevationAngle = calculateElevationAngle(modifiedX, modifiedY, modifiedZ),
             timeStamp = data.timeStamp
         )
     }
@@ -161,6 +179,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
                 x = alpha * accelerometerData.x + (1 - alpha) * gyroscopeData.x,
                 y = alpha * accelerometerData.y + (1 - alpha) * gyroscopeData.y,
                 z = alpha * accelerometerData.z + (1 - alpha) * gyroscopeData.z,
+                elevationAngle = calculateElevationAngle(accelerometerData.x, accelerometerData.y, accelerometerData.z),
                 timeStamp = accelerometerData.timeStamp,
             )
             _sensorFusionLiveData.postValue(fusedData)
@@ -173,34 +192,9 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     }
 
 
-    // Funktion för att uppdatera gyrovinkeln (integrering av gyroskopdata)
-    fun updateGyroAngle(gyroRate: Float) {
-        gyroAngle += gyroRate * deltaT // Integrera gyroskopets vinkelhastighet
-    }
 
-    // Funktion för att beräkna accelerometerns vinkel
-    fun calculateAccelAngle(accelX: Float, accelY: Float, accelZ: Float): Float {
-        // Exempel för att beräkna vinkeln i x-z-planet
-        return Math.toDegrees(Math.atan2(accelY.toDouble(), accelZ.toDouble())).toFloat()
-    }
 
-    // Komplementärt filter
-    fun applyComplementaryFilter(accelAngle: Float, gyroAngle: Float): Float {
-        // Filtrera signalen med accelerometer och gyroskop
-        return alpha * gyroAngle + (1 - alpha) * accelAngle
-    }
 
-    // Exempel: Uppdatera filtret med nya sensorvärden
-    fun updateFilter(accelX: Float, accelY: Float, accelZ: Float, gyroRate: Float) {
-        // Uppdatera gyrovinkeln
-        updateGyroAngle(gyroRate)
-        // Beräkna accelerometerns vinkel
-        accelAngle = calculateAccelAngle(accelX, accelY, accelZ)
-        // Använd komplementärt filter för att slå samman värdena
-        fusedAngle = applyComplementaryFilter(accelAngle, gyroAngle)
-        // Resultatet finns i fusedAngle
-        println("Fused Angle: $fusedAngle")
-    }
 
     fun formatTimestamp(timestamp: Long): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -210,7 +204,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     /** function to save data to csv file
      *
      * **/
-    private fun saveToCsv(dataList: List<SensorData>, fileName: String) {
+    private fun saveElevationAngleToCsv(dataList: List<SensorData>, fileName: String) {
         Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
         val file = fileDir?.resolve("$fileName.csv")
         file?.bufferedWriter().use { writer ->
@@ -245,10 +239,10 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
             }
             writer?.write("\n")
             // Skriv rubriker för andra datauppsättningen
-            writer?.write("gX;gY;gZ;Time\n")
+            writer?.write("fX;fY;fZ;Time\n")
             // Skriv data från dataList2
             dataList2.forEach { data ->
-                writer?.write("${data.x};${data.y};${data.z};${data.timeStamp}\n")
+                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp}\n")
             }
 
         }
@@ -287,13 +281,22 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
             return false // Fel vid sparning
         }
     }
+
+
+    fun calculateElevationAngle(x: Float, y: Float, z: Float): Float {
+        // Beräkna elevation angle i grader
+        val elevationAngleRadians = atan2(z.toDouble(), sqrt((x * x + y * y).toDouble()))
+        val elevationAngleDegrees = Math.toDegrees(elevationAngleRadians)
+        return elevationAngleDegrees.toFloat()
+    }
 }
 
 data class SensorData(
     val x: Float,
     val y: Float,
     val z: Float,
-    val timeStamp: String
+    val timeStamp: String,
+    val elevationAngle: Float
 )
 
 data class AccelerometerData (

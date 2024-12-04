@@ -234,7 +234,8 @@ fun createLineData(data: List<SensorData>): LineData {
     val xEntries = data.mapIndexed { index, point -> Entry(index.toFloat(), point.x) }
     val yEntries = data.mapIndexed { index, point -> Entry(index.toFloat(), point.y) }
     val zEntries = data.mapIndexed { index, point -> Entry(index.toFloat(), point.z) }
-
+    val elevation = data.mapIndexed { index, point -> Entry(index.toFloat(), point.elevationAngle) }
+/*
     val xDataSet = LineDataSet(xEntries, "X-Axis").apply {
         color = android.graphics.Color.RED
         valueTextColor = android.graphics.Color.RED
@@ -256,5 +257,14 @@ fun createLineData(data: List<SensorData>): LineData {
         setDrawCircles(false)
         setDrawValues(false)
     }
-    return LineData(xDataSet, yDataSet, zDataSet)
+    */
+    val xDataSet = LineDataSet(xEntries, "X-Axis").apply {
+        color = android.graphics.Color.RED
+        valueTextColor = android.graphics.Color.RED
+        lineWidth = 2f
+        setDrawCircles(false)
+        setDrawValues(false)
+    }
+    return LineData(xDataSet)
+  //  return LineData(xDataSet, yDataSet, zDataSet)
 }

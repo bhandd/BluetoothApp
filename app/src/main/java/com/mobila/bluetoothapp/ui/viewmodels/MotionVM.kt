@@ -10,6 +10,7 @@ import com.mobila.bluetoothapp.model.SensorData
 interface MotionViewModelBase{
     val linearAcceleration: LiveData<SensorData>
     val sensorFusion: LiveData<SensorData>
+   // val elevationAngle: LiveData<SensorData>
     fun stopListening()
     fun toggleRecording()
 }
