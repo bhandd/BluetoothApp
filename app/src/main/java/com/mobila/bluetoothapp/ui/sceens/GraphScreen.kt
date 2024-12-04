@@ -186,7 +186,8 @@ fun GraphScreen (
 
 @Composable
 fun DataGraph(
-    liveData: LiveData<SensorData>, yRange: Float
+    liveData: LiveData<SensorData>,
+    yRange: Float
 ) {
     val data = liveData.observeAsState()
     val dataPoints = remember { mutableStateListOf<SensorData>() }

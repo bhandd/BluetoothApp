@@ -24,14 +24,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.mobila.bluetoothapp.ui.viewmodels.FakeVM
 import com.mobila.bluetoothapp.ui.viewmodels.MotionViewModelBase
 
 import com.mobila.bluetoothapp.model.NavigationController
 import com.mobila.bluetoothapp.model.SensorData
+import com.mobila.bluetoothapp.model.utils.GraphUtils
+import java.io.File
 
 @Composable
 fun HomeScreen(
@@ -122,8 +131,9 @@ fun HomeScreen(
 
 @Composable
 fun MiddleElement(vm: MotionViewModelBase) {
-    val linearData = vm.linearAcceleration.observeAsState()
+    val linearData = vm.storedData.observeAsState()
     val sensorFusion = vm.sensorFusion.observeAsState()
+
     Box(
         contentAlignment = Alignment.Center
     ) {
@@ -138,7 +148,7 @@ fun MiddleElement(vm: MotionViewModelBase) {
                         .padding(bottom = 16.dp)
                 ) {
                     val data = linearData.value!!
-                    AccelerometerDataDisplay(data)
+                    AccelerometerDataDisplay(linearData.value!!)
                 }
             } else {
                 Text(text = "Waiting for motion data...", fontSize = 18.sp)
@@ -164,6 +174,8 @@ fun MiddleElement(vm: MotionViewModelBase) {
 
 @Composable
 fun AccelerometerDataDisplay(accelerometerData: SensorData) {
+    val graphUtils = GraphUtils()
+    val lineData = graphUtils.createLineData(listOf(accelerometerData))
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -174,23 +186,45 @@ fun AccelerometerDataDisplay(accelerometerData: SensorData) {
             fontSize = 20.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "X: ${ (Math.round(accelerometerData.x*100))/100f }",
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
+        AndroidView(
+            factory = { context ->
+                LineChart(context).apply {
+                    description.isEnabled = false
+                    setTouchEnabled(false)
+                    isDragEnabled = false
+                    setScaleEnabled(true)
+                    setPinchZoom(false)
+                    legend.isEnabled = true
+                    xAxis.apply {
+                        position = XAxis.XAxisPosition.BOTTOM
+                        setDrawGridLines(true)
+                    }
+                    axisLeft.apply {
+                        axisMaximum = 40f
+                        axisMinimum = -40f
+                        setDrawGridLines(true)
+                    }
+                    axisRight.isEnabled = false
+                }
+            },
+            update = { chart ->
+                chart.data = lineData
+                chart.invalidate()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
         )
-        Text(
-            text = "Y: ${ (Math.round(accelerometerData.y*100))/100f }",
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
-        )
-        Text(
-            text = "Z: ${ (Math.round(accelerometerData.z*100))/100f }",
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
-        )
+
+
         Spacer(modifier = Modifier.height(8.dp))
     }
+
+
+}
+
+fun invalidate() {
+    TODO("Not yet implemented")
 }
 
 @Composable
@@ -227,3 +261,5 @@ fun HomeScreenPreview() {
         HomeScreen(FakeVM(application = Application()))
     }
 }
+
+

@@ -34,6 +34,10 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     private val _gyroscopeData = MutableLiveData<SensorData>()
     val gyroscopeData: LiveData<SensorData> get() = _gyroscopeData
 
+    //stored data to display
+    private val _storedData = MutableLiveData<List<SensorData>>()
+    val storedData: LiveData<List<SensorData>> get() = _storedData
+
     //Save data
     private val _linearAccelerationDataList = mutableListOf<SensorData>()
     private val _linearAccelerationLiveData = MutableLiveData<SensorData>()
@@ -61,6 +65,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
     private val fileDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
     init {
+
         _accelerometerData.observeForever { accelerometerData ->
             accelerometerData?.let {
                 // Skapa en modifierad version av accelerometer-data
@@ -206,27 +211,14 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
         return sdf.format(Date(timestamp))
     }
 
-    /** function to save data to csv file
-     *
-     * **/
-    private fun saveToCsv(dataList: List<SensorData>, fileName: String) {
-        Log.d("MotionSensorHandler", "Saving data to file: ${fileDir?.absolutePath}")
-        val file = fileDir?.resolve("$fileName.csv")
-        file?.bufferedWriter().use { writer ->
-            // Skriv rubriker till CSV-filen
-            writer?.write("X;Y;Z;Time\n")
 
-            // Skriv sensor data från listan
-            dataList.forEach { data ->
-                writer?.write("${data.x};${data.y};${data.z}; ${data.timeStamp}\n")
-            }
-        }
-    }
 
     fun saveAccGyroData() {
         saveToCsv(_linearAccelerationDataList, _sensorFusionDataList, "Data")
     }
 
+
+    /**Save linear acceleration and sensor fusion in one csv-file*/
     private fun saveToCsv(
         dataList1: List<SensorData>,
         dataList2: List<SensorData>,
@@ -262,6 +254,24 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
         isRecording = !isRecording
     }
 
+    fun readCsvWithBufferedReader() {
+        val file = fileDir?.resolve("Data.csv")
+        val lines = readCsvWithBufferedReader(file!!)
+        lines.forEach { line ->
+            val values = line.split(";")
+            if (values.size == 4) {
+                val x = values[0].toFloat()
+                val y = values[1].toFloat()
+                val z = values[2].toFloat()
+                val timestamp = values[3]
+                _storedData.postValue(listOf(SensorData(x, y, z, timestamp)))
+            }
+        }
+    }
+
+    /**Read a csv file with BufferedReader
+     *
+     * */
     fun readCsvWithBufferedReader(file: File): List<String> {
         val lines = mutableListOf<String>()
         file.bufferedReader().use { reader -> // Skapar en BufferedReader
@@ -277,7 +287,7 @@ class MotionSensorHandler(application: Application) : SensorEventListener {
 
 
 
-    //TODO: delete
+    //TODO: delete?
     fun saveChartToFile(lineChart: LineChart, fileName: String): Boolean {
         try {
             // Skapa en bitmap från grafen
